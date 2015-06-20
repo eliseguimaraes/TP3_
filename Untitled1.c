@@ -37,7 +37,7 @@ int main () {
                             if (r==aux && z>2) {
                                 comum = commonFactor3(A,B,C);
                                 if (comum!=1) {
-                                    //printf("\n%d^%d + %d^%d = %d^%d, com fator primo %d\n",A,x,B,y,C,z,comum);
+                                    printf("\n%d^%d + %d^%d = %d^%d, com fator primo %d\n",A,x,B,y,C,z,comum);
                                 }
                                 else {
                                     printf("\n%d^%d + %d^%d = %d^%d, E NAO HA FATOR PRIMO!",A,x,B,y,C,z,comum);
