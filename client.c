@@ -22,7 +22,7 @@ void deserialize (unsigned char *pkt, unsigned int *pmin, unsigned int *pmax, un
 }
 
 struct set {
-    unsigned int A, B, C, x, y, z, comum;
+    unsigned int A, B, C, x, y, z;
 };
 
 void serialize (struct set result, char *pkt) {
@@ -42,10 +42,8 @@ void serialize (struct set result, char *pkt) {
         pkt[i+4*a]+=1;
         pkt[i+5*a] = (result.z) >> 8*i;
         pkt[i+5*a]+=1;
-        pkt[i+6*a] = (result.comum) >> 8*i;
-        pkt[i+6*a]+=1;
     }
-    i+=6*a;
+    i+=5*a;
     pkt[i] = '\0';
 }
 
@@ -88,7 +86,6 @@ int searchResult (unsigned int bmin, unsigned int bmax, unsigned int pmin, unsig
                                     result[i].x = x;
                                     result[i].y = y;
                                     result[i].z = z;
-                                    result[i].comum = comum;
                                     i++;
                                 }
                             }
@@ -150,12 +147,12 @@ int main(int argc , char *argv[]) {
         deserialize(server_reply, &pmin, &pmax, &bmin, &bmax);
         printf ("\nAnalisando intervalos de bases %u a %u e potencias %u a %u.\n",bmin, bmax, pmin, pmax);
         num = searchResult(bmin, bmax, pmin, pmax, result);
-        sprintf(message,"%03d",num);
+        sprintf(message,"%03d",num); //envia o numero de resultados encontrados (provavelmente nenhum)
         if(send(sock , message , strlen(message) , 0) < 0) {
             puts("Falha no envio.");
             return 1;
         }
-        for (i=0; i<num; i++) {
+        for (i=0; i<num; i++) { //envia os resultados encontrados um a um
                 serialize(result[i],pkt);
                 if (send(sock, pkt, tam_pkt2, 0)<0) {
                         puts("Falha no envio.");
