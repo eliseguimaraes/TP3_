@@ -15,16 +15,21 @@
 #define BMIN 3
 #define BMAX 1000
 #define PMIN 3
-#define PMAX 15
-#define BINT 100
-#define PINT 10
+#define PMAX 20
+#define BINT 300
+#define PINT 5
 #define MAX_CLIENTS 100
 
 struct set {
     unsigned int A, B, C, x, y, z;
 };
 
-char status[MAX_CLIENTS][256];
+struct statusN{
+    int type;
+    char statusMsg[256];
+};
+
+struct statusN status[MAX_CLIENTS];
 int clients_had;
 
 struct argument {
@@ -213,7 +218,19 @@ void *http_handler (void *socketd) {
                 sprintf(string,"<center>%d clientes ja se conectaram</center>", clients_had);
                 strcat(mesg, string);
                 for (i=0; i<clients_had; i++) {
-                    strcat(mesg,status[i]);
+                    if (status[i].type == 1) {
+                        strcat(mesg,status[i].statusMsg);
+                    }
+                }
+                for (i=0; i<clients_had; i++) {
+                    if (status[i].type == 2) {
+                        strcat(mesg,status[i].statusMsg);
+                    }
+                }
+                for (i=0; i<clients_had; i++) {
+                    if (status[i].type == 3) {
+                        strcat(mesg,status[i].statusMsg);
+                    }
                 }
                 strcat(mesg, "</BODY>");
                 strcat(mesg, "</HTML>");
@@ -241,7 +258,8 @@ void *connection_handler(void *args) {
     if ((read_size = recv(sock , client_message , 2000 , 0)) > 0) {
         strcpy(identificador, client_message);
             //printf("\n%s processando intervalo de bases %u a %u e potencias %u a %u\n", identificador, bmin_at, bmax_at,pmin_at,pmax_at);
-        sprintf(status[client_no],"\r\n<p>%s processando intervalo de bases %u a %u e potencias %u a %u</p>\r\n", identificador, bmin_at, bmax_at,pmin_at,pmax_at);
+        status[client_no].type = 1; //status de processando
+        sprintf(status[client_no].statusMsg,"<br>%s processando intervalo de bases %u a %u e potencias %u a %u<br>", identificador, bmin_at, bmax_at,pmin_at,pmax_at);
     }
 
     message = (char*)malloc(4*sizeof(unsigned int));
@@ -272,10 +290,12 @@ void *connection_handler(void *args) {
             return;
         }
         deserialize(client_message,result+i);
-        sprintf(status[client_no],"\r\nResultado do processamento de bases %d a %d e expoentes %d a %d por %s: %u^%u + %u^%u = %u^%u, sem fator primo comum\r\n", bmin_at, bmax_at,pmin_at,pmax_at,identificador, result[i].A, result[i].x,result[i].B,result[i].y,result[i].C,result[i].z);
+        status[client_no].type = 2; //status de encontrado
+        sprintf(status[client_no].statusMsg,"<br>Resultado do processamento de bases %d a %d e expoentes %d a %d por %s: %u^%u + %u^%u = %u^%u, sem fator primo comum<br>", bmin_at, bmax_at,pmin_at,pmax_at,identificador, result[i].A, result[i].x,result[i].B,result[i].y,result[i].C,result[i].z);
     }
     if(!num) {
-        sprintf(status[client_no],"\r\nResultado do processamento de bases %d a %d e expoentes %d a %d por %s: nenhuma excecao encontrada.\r\n",bmin_at, bmax_at,pmin_at,pmax_at,identificador);
+        status[client_no].type = 3; //status de não encontrado
+        sprintf(status[client_no].statusMsg,"<br>Resultado do processamento de bases %d a %d e expoentes %d a %d por %s: nenhuma excecao encontrada.<br>",bmin_at, bmax_at,pmin_at,pmax_at,identificador);
     }
     free(message);
     free(result);

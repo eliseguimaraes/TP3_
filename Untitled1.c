@@ -59,13 +59,12 @@ int searchResult (int bmin, int bmax, int pmin, int pmax, struct set *result) {
 int main () {
     int bmin, bmax, pmin,pmax, num,i;
     struct set result[100];
-    bmin = 2;
-    bmax = 300;
+    bmin = 600;
+    bmax = 800;
     pmin = 3;
     pmax = 9;
     num = searchResult(bmin, bmax, pmin, pmax, result);
     for (i=0; i<num; i++) {
         printf("\n%d^%d + %d^%d = %d^%d, E NAO HA FATOR PRIMO!",result[i].A,result[i].x,result[i].B,result[i].y,result[i].C,result[i].z,result[i].comum);
-    }
-    return 0;
+    }    return 0;
 }
