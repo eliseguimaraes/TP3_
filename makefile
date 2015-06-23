@@ -1,0 +1,24 @@
+IP = 127.0.0.1
+PORTO = 32000
+HTTP = 32001
+ID = eliseguimaraes
+IDB = teste2
+IDC = teste3
+CC = gcc
+
+server:
+	$(CC) server.c -lm -lpthread -o server 
+client:
+	$(CC) client.c -lm -o client
+
+runs:
+	./server $(PORTO) $(HTTP)
+
+runc:
+	./client  $(IP) $(PORTO) $(ID)
+
+runb: 
+	./client  $(IP) $(PORTO) $(IDB)
+
+rund:
+	./client  $(IP) $(PORTO) $(IDC)
