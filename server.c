@@ -213,7 +213,7 @@ void *http_handler (void *socketd) { //lida com tudo do server de http
             }
             if ((childpid = fork()) == 0) {
                 close (listenfd);
-                n = recv(connfd,mesg,1000,0);
+                n = recv(connfd,mesg,1000,0); //recebe mensagem de requisição do cliente
                 mesg[n] = 0;
                 strcpy(mesg,"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<HTML><HEAD><TITLE>Teste</TITLE><style>table, th, td {border: 1px solid black;border-collapse: collapse;}th, td {padding: 5px;}</style></HEAD><BODY>");
                 sprintf(string,"<center><h1>Resultados da busca por contra-exemplos da conjectura de Beal</h1></center><br>");
