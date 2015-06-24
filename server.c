@@ -16,8 +16,8 @@
 #define BMAX 1000
 #define PMIN 3
 #define PMAX 20
-#define BINT 300
-#define PINT 7
+#define BINT 300 //número de bases dadas a cada cliente para análise
+#define PINT 7 //número de expoentes dados a cada cliente para análise
 #define MAX_CLIENTS 100
 
 struct set {
@@ -197,7 +197,7 @@ int main(int argc , char *argv[]) {
     return 0;
 }
 
-void *http_handler (void *socketd) {
+void *http_handler (void *socketd) { //lida com tudo do server de http
         struct sockaddr_in cliaddr;
         socklen_t clilen;
         pid_t childpid;
@@ -251,7 +251,7 @@ void *http_handler (void *socketd) {
             close(connfd);
         }
 }
-void *connection_handler(void *args) {
+void *connection_handler(void *args) { //lida com as conexões do clientes de teste
     //Get the socket descriptor
     struct argument *arg;
     arg = args;
