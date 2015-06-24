@@ -17,7 +17,7 @@
 #define PMIN 3
 #define PMAX 20
 #define BINT 300
-#define PINT 5
+#define PINT 7
 #define MAX_CLIENTS 100
 
 struct set {
@@ -34,7 +34,7 @@ int clients_had;
 
 struct argument {
     int client_no;
-    int pmin_at, pmax_at, bmin_at, bmax_at;
+    unsigned int pmin_at, pmax_at, bmin_at, bmax_at;
     int new_sock;
 };
 
@@ -193,6 +193,7 @@ int main(int argc , char *argv[]) {
         }
     }
     //mesmo depois de terminado o processamento, o servidor de http deve se manter funcionando
+    while(1){}
     return 0;
 }
 
@@ -201,7 +202,7 @@ void *http_handler (void *socketd) {
         socklen_t clilen;
         pid_t childpid;
         int connfd,n,i;
-        char mesg[1000], string[100];
+        char mesg[10000], string[100];
         int listenfd = *(int*)socketd;
         while(1) {
             clilen=sizeof(cliaddr);
@@ -214,9 +215,19 @@ void *http_handler (void *socketd) {
                 close (listenfd);
                 n = recv(connfd,mesg,1000,0);
                 mesg[n] = 0;
-                strcpy(mesg,"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<HTML><HEAD><TITLE>Teste</TITLE></HEAD><BODY>");
-                sprintf(string,"<center>%d clientes ja se conectaram</center>", clients_had);
+                strcpy(mesg,"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<HTML><HEAD><TITLE>Teste</TITLE><style>table, th, td {border: 1px solid black;border-collapse: collapse;}th, td {padding: 5px;}</style></HEAD><BODY>");
+                sprintf(string,"<center><h1>Resultados da busca por contra-exemplos da conjectura de Beal</h1></center><br>");
+                strcat(mesg,string);
+                sprintf(string,"<p>Intervalo total analisado:<br>Bases: %d a %d<br>Expoentes: %d a %d</p><br>",BMIN,BMAX,PMIN,PMAX);
+                strcat(mesg,string);
+                sprintf(string,"<p>%d clientes ja se conectaram</p><br>", clients_had);
                 strcat(mesg, string);
+                sprintf(string, "<table style=\"width:100%%\">");
+                strcat(mesg,string);
+                sprintf(string,"<tr><th>Id do cliente</th><th>Bases</th><th>Expoentes</th><th>Resultado</th></tr>");
+                strcat(mesg,string);
+                send(connfd,mesg,strlen(mesg),0);
+                strcpy(mesg,"");
                 for (i=0; i<clients_had; i++) {
                     if (status[i].type == 1) {
                         strcat(mesg,status[i].statusMsg);
@@ -232,6 +243,7 @@ void *http_handler (void *socketd) {
                         strcat(mesg,status[i].statusMsg);
                     }
                 }
+                strcat(mesg,"</table>");
                 strcat(mesg, "</BODY>");
                 strcat(mesg, "</HTML>");
                 send(connfd,mesg,strlen(mesg),0);
@@ -259,7 +271,7 @@ void *connection_handler(void *args) {
         strcpy(identificador, client_message);
             //printf("\n%s processando intervalo de bases %u a %u e potencias %u a %u\n", identificador, bmin_at, bmax_at,pmin_at,pmax_at);
         status[client_no].type = 1; //status de processando
-        sprintf(status[client_no].statusMsg,"<br>%s processando intervalo de bases %u a %u e potencias %u a %u<br>", identificador, bmin_at, bmax_at,pmin_at,pmax_at);
+        sprintf(status[client_no].statusMsg,"<tr><td>%s</td><td>%u a %u</td><td>%u a %u</td><td>Processando</td></tr>", identificador, bmin_at, bmax_at,pmin_at,pmax_at);
     }
 
     message = (char*)malloc(4*sizeof(unsigned int));
@@ -272,7 +284,7 @@ void *connection_handler(void *args) {
     }
     else if(read_size == 0)
     {
-        puts("Client disconnected");
+        puts("Cliente desconectou");
         fflush(stdout);
         return 0;
     }
@@ -285,17 +297,17 @@ void *connection_handler(void *args) {
             exit(1);
         }
         else if(read_size == 0) {
-            puts("Client disconnected");
+            puts("Cliente desconectou");
             fflush(stdout);
             return;
         }
         deserialize(client_message,result+i);
         status[client_no].type = 2; //status de encontrado
-        sprintf(status[client_no].statusMsg,"<br>Resultado do processamento de bases %d a %d e expoentes %d a %d por %s: %u^%u + %u^%u = %u^%u, sem fator primo comum<br>", bmin_at, bmax_at,pmin_at,pmax_at,identificador, result[i].A, result[i].x,result[i].B,result[i].y,result[i].C,result[i].z);
+        sprintf(status[client_no].statusMsg,"<tr><td>%s</td><td>%u a %u</td><td>%u a %u</td><td>%u^%u + %u^%u = %u^%u, sem fator primo comum</td></tr>", identificador, bmin_at, bmax_at,pmin_at,pmax_at, result[i].A, result[i].x,result[i].B,result[i].y,result[i].C,result[i].z);
     }
     if(!num) {
         status[client_no].type = 3; //status de não encontrado
-        sprintf(status[client_no].statusMsg,"<br>Resultado do processamento de bases %d a %d e expoentes %d a %d por %s: nenhuma excecao encontrada.<br>",bmin_at, bmax_at,pmin_at,pmax_at,identificador);
+        sprintf(status[client_no].statusMsg,"<tr><td>%s</td><td>%u a %u</td><td>%u a %u</td><td>Nenhum contra-exemplo encontrado</td></tr>",identificador,bmin_at, bmax_at,pmin_at,pmax_at);
     }
     free(message);
     free(result);

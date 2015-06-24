@@ -64,7 +64,7 @@ unsigned int commonFactor3 (unsigned int a, unsigned int b, unsigned int c) {
 
 int searchResult (unsigned int bmin, unsigned int bmax, unsigned int pmin, unsigned int pmax, struct set *result) {
     unsigned int A,B,C,x,y,z,comum,r;
-    long long unsigned int aux;
+    long long int aux;
     int i = 0;
     for (A=bmin; A<=bmax; A++) {
         for (x=pmin; x<=pmax; x++) {
